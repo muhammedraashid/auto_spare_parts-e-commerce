@@ -11,4 +11,5 @@ urlpatterns = [
     path('auth/login/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/register/', views.UserViewSet.as_view({'post': 'register'}), name='register'),
     path('auth/me/', views.UserViewSet.as_view({'get': 'me'}), name='user_me'),
+    path('users/', views.AdminUserListView.as_view(), name='admin-users'),
 ]

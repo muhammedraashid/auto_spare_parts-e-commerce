@@ -67,11 +67,11 @@ export function BannerList({
         <Card key={banner.id} className={banner.active ? '' : 'opacity-60'}>
           <CardContent className="p-0">
             <div className="flex flex-col md:flex-row">
-              <div className="w-full md:w-64 h-40 bg-muted">
+              <div className="h-40 bg-muted">
                 <img
                   src={banner.image}
                   alt={banner.titleEn}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
               <div className="flex-1 p-6">

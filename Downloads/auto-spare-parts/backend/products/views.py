@@ -9,6 +9,7 @@ from .serializers import (
     ProductDetailSerializer, ProductCreateUpdateSerializer,
     ReviewSerializer, ReviewCreateSerializer, ProductImageSerializer
 )
+import json
 
 class IsAdminOrReadOnly(permissions.BasePermission):
     """
@@ -35,6 +36,23 @@ class CategoryViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
         return super().get_permissions()
+    
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        translations_str = data.get('translations')
+        if translations_str and isinstance(translations_str, str):
+            try:
+                data['translations'] = json.loads(translations_str)
+            except json.JSONDecodeError:
+                return Response(
+                    {"error": "Invalid JSON for translations"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
@@ -48,6 +66,26 @@ class BrandViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
         return super().get_permissions()
+    
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+
+        # Example: if you want to parse a JSON string field named 'extra_data'
+        extra_data_str = data.get('extra_data')
+        if extra_data_str and isinstance(extra_data_str, str):
+            try:
+                data['extra_data'] = json.loads(extra_data_str)
+            except json.JSONDecodeError:
+                return Response(
+                    {"error": "Invalid JSON for extra_data"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
@@ -103,6 +141,18 @@ class ProductViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(featured_products, many=True)
         return Response(serializer.data)
+    
+    def create(self, request, *args, **kwargs):
+        if 'translations' in request.data:
+            try:
+                translations_str = request.data.get('translations')
+                # Try parsing translations from string to dict
+                request.data._mutable = True  # If QueryDict is immutable
+                request.data['translations'] = json.loads(translations_str)
+            except Exception:
+                return Response({'translations': ['Invalid JSON format']}, status=status.HTTP_400_BAD_REQUEST)
+
+        return super().create(request, *args, **kwargs)
 
 class ProductImageViewSet(viewsets.ModelViewSet):
     queryset = ProductImage.objects.all()

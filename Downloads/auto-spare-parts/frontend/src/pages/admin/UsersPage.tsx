@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Omega, Search } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
+import { fetchUsers } from '@/services/userServices';
 
 // Mock data for users
 const mockUsers = [
@@ -54,7 +55,24 @@ export default function UsersPage() {
   const { language } = useLanguage();
   const isRtl = language === 'ar';
   const [searchTerm, setSearchTerm] = useState('');
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const data = await fetchUsers();
+        setUsers(data);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load users.');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    loadUsers();
+  }, []);
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

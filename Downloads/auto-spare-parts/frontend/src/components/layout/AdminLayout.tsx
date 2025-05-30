@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Navigate, useLocation, Link, useNavigate } from 'react-router-dom';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent } from '@/components/ui/sidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { LayoutDashboard, Package, Users, Settings, ChevronRight, Sun, Moon, ShoppingBag, CreditCard, ImageIcon, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, Users, Settings, ChevronRight, Sun, Moon, ShoppingBag, CreditCard, ImageIcon, LogOut ,Layers, Tag} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -128,6 +128,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
+                    <SidebarMenuButton asChild className={isActive('/admin/categories') ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}>
+                      <Link to="/admin/categories">
+                        <Layers /> {/* You can change this icon to something else if preferred */}
+                        <span>{language === 'en' ? 'Categories' : 'الفئات'}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+
+                  <SidebarMenuItem>
                     <SidebarMenuButton asChild className={isActive('/admin/payments') ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}>
                       <Link to="/admin/payments">
                         <CreditCard />
@@ -140,6 +149,17 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                       <Link to="/admin/banners">
                         <ImageIcon />
                         <span>{language === 'en' ? 'Banners' : 'البانرات'}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      className={isActive('/admin/brands') ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}
+                    >
+                      <Link to="/admin/brands">
+                        <Tag /> {/* You can change this icon to something else if preferred */}
+                        <span>{language === 'en' ? 'Brands' : 'العلامات التجارية'}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

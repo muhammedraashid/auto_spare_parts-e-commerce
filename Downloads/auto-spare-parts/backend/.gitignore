@@ -1,0 +1,66 @@
+# Python bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.sqlite3
+
+# Media and static files (adjust if needed)
+media/
+staticfiles/
+static/
+
+# Environment variables
+*.env
+.env
+
+# Virtual environment folder
+venv/
+env/
+.venv/
+
+# IDE/editor configs (common ones)
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node.js dependencies and build (for frontend)
+node_modules/
+build/
+dist/
+
+# MacOS files
+.DS_Store
+
+# Logs
+*.log
+
+# Frontend related
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# pyenv
+.python-version
+
+# pytest cache
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# celery beat schedule file
+celerybeat-schedule
+
+# pyre type checker
+.pyre/

@@ -1,17 +1,18 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import Banner, Promotion
+from parler.admin import TranslatableAdmin
 
 @admin.register(Banner)
-class BannerAdmin(admin.ModelAdmin):
+class BannerAdmin(TranslatableAdmin):
     list_display = ('title', 'get_is_active', 'start_date', 'end_date', 'order')
     list_filter = ('active', 'start_date', 'end_date')
-    search_fields = ('title', 'description')
+    search_fields = ('translations__title', 'translations__description')
     ordering = ('order', '-start_date')
     
     fieldsets = (
         (None, {
-            'fields': ('title', 'description', 'image', 'cta_text', 'cta_url')
+            'fields': ('title', 'description', 'image', 'cta_text', 'url')
         }),
         (_('Schedule'), {
             'fields': ('start_date', 'end_date')
@@ -27,10 +28,10 @@ class BannerAdmin(admin.ModelAdmin):
     get_is_active.boolean = True
 
 @admin.register(Promotion)
-class PromotionAdmin(admin.ModelAdmin):
+class PromotionAdmin(TranslatableAdmin):
     list_display = ('title', 'get_is_active', 'start_date', 'end_date', 'discount_value')
     list_filter = ('is_active', 'start_date', 'end_date')
-    search_fields = ('title', 'description')
+    search_fields = ('translations__title', 'translations__description')
     ordering = ('-start_date',)
     
     fieldsets = (

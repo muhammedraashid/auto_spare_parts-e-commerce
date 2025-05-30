@@ -35,10 +35,12 @@ class Category(MPTTModel, TranslatableModel):
     class Meta:
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
-        ordering = ['order', 'translations__name']
+        # ordering = ['order', 'translations__name']
+        ordering = ['order']
     
     class MPTTMeta:
         order_insertion_by = ['order', 'translations__name']
+        order_insertion_by = ['order']
     
     def __str__(self):
         return self.safe_translation_getter('name', any_language=True) or self.slug

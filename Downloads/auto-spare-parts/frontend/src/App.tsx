@@ -22,7 +22,8 @@ import ProductsManagementPage from "./pages/admin/ProductsPage";
 import UsersPage from "./pages/admin/UsersPage";
 import BannersPage from "./pages/admin/BannersPage";
 import AdminLoginPage from "./pages/admin/LoginPage";
-
+import CategoryPage from "./pages/admin/CategoryPage";
+import BrandsPage from "./pages/admin/BrandsPage";
 // Create a ThemeInitializer component to handle meta tag updates
 const ThemeInitializer = () => {
   const { isMounted } = useTheme();
@@ -89,8 +90,10 @@ const App = () => (
               <Route path="/admin/login" element={<AdminLoginPage />} />
               <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/admin/products" element={<ProtectedRoute><ProductsManagementPage /></ProtectedRoute>} />
+              <Route path="/admin/categories" element={<ProtectedRoute><CategoryPage /></ProtectedRoute>} />
               <Route path="/admin/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
               <Route path="/admin/banners" element={<ProtectedRoute><BannersPage /></ProtectedRoute>} />
+              <Route path="/admin/brands" element={<ProtectedRoute><BrandsPage /></ProtectedRoute>} />
               <Route path="/admin/orders" element={<ProtectedRoute><Navigate to="/admin" /></ProtectedRoute>} />
               <Route path="/admin/payments" element={<ProtectedRoute><Navigate to="/admin" /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute><Navigate to="/admin" /></ProtectedRoute>} />

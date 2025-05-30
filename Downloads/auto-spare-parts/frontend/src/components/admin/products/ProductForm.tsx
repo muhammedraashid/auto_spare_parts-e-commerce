@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -24,18 +23,24 @@ const productFormSchema = z.object({
   nameAr: z.string().min(2, { message: "Arabic product name must be at least 2 characters" }),
   descriptionEn: z.string().min(10, { message: "Description must be at least 10 characters" }),
   descriptionAr: z.string().min(10, { message: "Arabic description must be at least 10 characters" }),
-  price: z.string().regex(/^\d+(\.\d{1,2})?$/, { message: "Price must be a valid number" }),
-  stock: z.string().regex(/^\d+$/, { message: "Stock must be a valid number" }),
+  
   category: z.string().min(1, { message: "Category is required" }),
-  isAvailable: z.boolean().default(true),
-  // Image will be handled separately
-});
+  brand: z.string().optional(),
+  price: z.string().regex(/^\d+(\.\d{1,2})?$/, { message: "Price must be a valid number" }),
+  compareAtPrice: z.string().regex(/^\d+(\.\d{1,2})?$/).optional().or(z.literal('')),
+  stock: z.string().regex(/^\d+$/, { message: "Stock must be a valid number" }),
+  sku: z.string().min(1),
+ 
 
-type ProductFormValues = z.infer<typeof productFormSchema>;
+  isFeatured: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+
+});
+export type ProductFormValues = z.infer<typeof productFormSchema>;
 
 interface ProductFormProps {
   initialData?: ProductFormValues;
-  onSubmit: (data: ProductFormValues) => void;
+  onSubmit: (data: ProductFormValues, image?: File | null) => void;
   isLoading?: boolean;
 }
 
@@ -43,41 +48,46 @@ export function ProductForm({ initialData, onSubmit, isLoading = false }: Produc
   const { language } = useLanguage();
   const isRtl = language === 'ar';
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
-  
-  const form = useForm<ProductFormValues>({
-    resolver: zodResolver(productFormSchema),
-    defaultValues: initialData || {
-      nameEn: '',
-      nameAr: '',
-      descriptionEn: '',
-      descriptionAr: '',
-      price: '',
-      stock: '',
-      category: '',
-      isAvailable: true,
-    },
-  });
+  const [imageFile, setImageFile] = React.useState<File | null>(null);
 
+  const form = useForm<ProductFormValues>({
+  resolver: zodResolver(productFormSchema),
+  defaultValues: initialData || {
+    nameEn: '',
+    nameAr: '',
+    descriptionEn: '',
+    descriptionAr: '',
+    category: '',
+    brand: '',
+    price: '',
+    compareAtPrice: '',
+    stock: '',
+    sku: '',
+    isFeatured: false,
+    isActive: true,
+  },
+});
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Check file size (max 2MB)
       if (file.size > 2 * 1024 * 1024) {
-        alert('Image size should not exceed 2MB');
+        alert(isRtl ? 'يجب ألا يتجاوز حجم الصورة 2 ميغابايت' : 'Image size should not exceed 2MB');
         return;
       }
-      
+      setImageFile(file);
       const reader = new FileReader();
-      reader.onload = () => {
-        setImagePreview(reader.result as string);
-      };
+      reader.onload = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
+  const internalSubmit = (data: ProductFormValues) => {
+    onSubmit(data, imageFile);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(internalSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* English Content */}
           <Card>
@@ -218,28 +228,104 @@ export function ProductForm({ initialData, onSubmit, isLoading = false }: Produc
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="isAvailable"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        {isRtl ? 'متاح للبيع' : 'Available for sale'}
-                      </FormLabel>
-                      <FormDescription>
-                        {isRtl ? 'هذا المنتج سيظهر في الموقع' : 'This product will be displayed on the site'}
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="isFeatured"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      {isRtl ? 'مميز' : 'Featured'}
+                    </FormLabel>
+                    <FormDescription>
+                      {isRtl ? 'يظهر هذا المنتج كمنتج مميز في المتجر' : 'This product will be featured in the store'}
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="brand"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{isRtl ? 'العلامة التجارية' : 'Brand'}</FormLabel>
+                  <FormControl>
+                    <Input placeholder={isRtl ? 'أدخل العلامة التجارية' : 'Enter brand'} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="sku"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{isRtl ? 'رمز المنتج (SKU)' : 'SKU'}</FormLabel>
+                  <FormControl>
+                    <Input placeholder={isRtl ? 'أدخل رمز المنتج' : 'Enter SKU'} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="compareAtPrice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{isRtl ? 'السعر قبل الخصم' : 'Compare at Price'}</FormLabel>
+                  <FormDescription>
+                    {isRtl
+                      ? 'السعر السابق للعرض، اختياري'
+                      : 'Previous price for comparison (optional)'}
+                  </FormDescription>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder={isRtl ? 'أدخل السعر قبل الخصم' : 'Enter compare at price'}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+
+            <FormField
+              control={form.control}
+              name="isActive"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      {isRtl ? 'نشط' : 'Active'}
+                    </FormLabel>
+                    <FormDescription>
+                      {isRtl ? 'المنتج نشط ومتاح للبيع' : 'Product is active and available for sale'}
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+
             </div>
           </CardContent>
         </Card>

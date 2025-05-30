@@ -3,8 +3,8 @@ import { Banner } from '@/components/admin/banners/BannerForm';
 
 export const fetchBanners = async (): Promise<Banner[]> => {
   try {
-    const response = await api.get('banners/');
-    return response.data;
+    const response = await api.get<{ results: Banner[] }>('banners/');
+    return response.data.results;
   } catch (error) {
     console.error('Error fetching banners:', error);
     throw error;
@@ -13,8 +13,8 @@ export const fetchBanners = async (): Promise<Banner[]> => {
 
 export const fetchActiveBanners = async (): Promise<Banner[]> => {
   try {
-    const response = await api.get('banners/active/');
-    return response.data;
+    const response = await api.get<{ results: Banner[] }>('banners/active/');
+    return response.data.results;
   } catch (error) {
     console.error('Error fetching active banners:', error);
     throw error;
@@ -27,7 +27,7 @@ export const createBanner = async (bannerData: FormData): Promise<Banner> => {
 };
 
 export const updateBanner = async (id: string, bannerData: FormData): Promise<Banner> => {
-  const response = await api.put(`banners/${id}/`, bannerData);
+  const response = await api.patch(`banners/${id}/`, bannerData);
   return response.data;
 };
 

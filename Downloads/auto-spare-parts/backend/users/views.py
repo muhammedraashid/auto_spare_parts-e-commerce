@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status, permissions, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
@@ -12,20 +13,27 @@ from .serializers import (
     ResetPasswordEmailSerializer, ResetPasswordConfirmSerializer
 )
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+
 User = get_user_model()
 
+
+@method_decorator(csrf_exempt, name='dispatch')
 class CustomTokenObtainPairView(TokenObtainPairView):
-    """
-    Custom token obtain pair view that adds user data to the response.
-    """
+
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         if response.status_code == 200:
-            user = User.objects.get(email=request.data['email'])
-            user_data = UserSerializer(user).data
-            response.data.update(user_data)
+            try:
+                user = User.objects.get(email=request.data['email'])
+                user_data = UserSerializer(user).data
+                response.data.update(user_data)
+            except User.DoesNotExist:
+                pass
         return response
-
+    
+    
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -112,3 +120,15 @@ class UserAddressViewSet(viewsets.ModelViewSet):
         address.is_default = True
         address.save()
         return Response({'detail': _('Default address updated.')})
+
+
+
+
+class AdminUserListView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        users = User.objects.all()  # no filter here
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+    

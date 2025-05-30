@@ -12,14 +12,14 @@ class BannerViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['order', 'created_at']
     
-    def get_permissions(self):
+    def get_permissions(self):       
         if self.action in ['list', 'retrieve', 'active']:
             return [permissions.AllowAny()]
         return super().get_permissions()
     
     @action(detail=False, methods=['get'])
     def active(self, request):
-        active_banners = self.get_queryset().filter(is_active=True)
+        active_banners = self.get_queryset().filter(active=True)
         serializer = self.get_serializer(active_banners, many=True)
         return Response(serializer.data)
 

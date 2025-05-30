@@ -13,12 +13,21 @@ class UserAddressSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     addresses = UserAddressSerializer(many=True, read_only=True)
-    
+    country = serializers.SerializerMethodField()  # << REQUIRED
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'name', 'phone', 'address', 'city', 'country', 
-                 'language', 'is_staff', 'is_active', 'addresses', 'created_at']
+        fields = [
+            'id', 'username', 'email', 'name', 'phone', 'address', 'city', 'country',
+            'language', 'is_staff', 'is_active', 'addresses', 'created_at'
+        ]
         read_only_fields = ['id', 'is_staff', 'is_active', 'created_at']
+
+    def get_country(self, obj):
+        if obj.country:
+            return str(obj.country) 
+        return ""
+    
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
